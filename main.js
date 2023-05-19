@@ -245,7 +245,17 @@ function addTrain() {
   trains.push(train);
 }
 
+class Coin {
+  constructor(image, x, y) {
+    this.image = image;
+    this.x = x;
+    this.y = y;
+  }
 
+  draw() {
+    image(this.image, this.x, this.y);
+  }
+}
 
 function keyPressed() {
   switch (keyCode) {
