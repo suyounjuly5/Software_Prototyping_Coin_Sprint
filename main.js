@@ -17,6 +17,7 @@ let coins = [];
 let firstRoadIndex;
 let secondRoadIndex;
 let trainTrackIndex;
+let player;
 
 let timeSinceLastTrain = 0;
 let timeSinceLastCarLeft = 0;
@@ -87,3 +88,64 @@ function updateTimeLeft() {
     document.getElementById('game-over').style.display = 'block';
   }
 }
+
+class Character {
+  constructor(image, x, y) {
+    this.image = image;
+    this.x = x; //player's current x-coordinate
+    this.y = y; //player's current y-coordinate
+  }
+
+  move(direction) {
+    let image;
+    let nextX = this.x;
+    let nextY = this.y;
+    switch (direction) {
+      case 'up':
+        nextY = max(0, this.y - 100);
+        image = character['up'];
+        break;
+      case 'down':
+        nextY = min(height - 100, this.y + 100);
+        image = character['down'];
+        break;
+      case 'left':
+        nextX = max(0, this.x - 100);
+        image = character['left'];
+        break;
+      case 'right':
+        nextX = min(width - 100, this.x + 100);
+        image = character['right'];
+        break;
+    }
+
+    for (let obstacle of walkroadObstacles) {
+      if (obstacle.x === nextX && obstacle.y === nextY) {
+        console.log('Blocked by a tree or bush!');
+        return;
+      }
+    }
+    //update position
+    this.x = nextX;
+    this.y = nextY;
+    this.image = image;
+  }
+  draw() {
+    image(this.image, this.x, this.y);
+  }
+
+  checkCollision(entity) {
+    let characterLeft = this.x;
+    let characterRight = this.x + this.image.width;
+    let characterTop = this.y;
+    let characterBottom = this.y + this.image.height;
+
+    let entityLeft = entity.x;
+    let entityRight = entity.x + entity.image.width;
+    let entityTop = entity.y;
+    let entityBottom = entity.y + entity.image.height;
+
+    return !(characterLeft > entityRight || characterRight < entityLeft || characterTop > entityBottom || characterBottom < entityTop);
+  }
+}
+
