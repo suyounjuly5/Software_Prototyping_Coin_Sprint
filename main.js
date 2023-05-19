@@ -90,6 +90,166 @@ function updateTimeLeft() {
 }
 
 
+function setup() {
+  createCanvas(1000, 800);
+  shuffle(backgrounds, true);
+
+  if (!backgrounds.includes('walkroad')) {
+    backgrounds[0] = 'walkroad';
+  }
+  backgrounds.push('walkroad');
+  //console.log(backgrounds);
+  let roadIndices = backgrounds.map((bg, index) => bg === 'road' ? index : -1).filter(index => index !== -1);
+  firstRoadIndex = roadIndices[0];
+  secondRoadIndex = roadIndices[1];
+
+
+
+
+  for (let i = 0; i < 5; i++) {
+    addCar();
+  }
+
+  // generate new car every 1-2 seconds
+  timeSinceLastCarLeft = random(60, 120);
+  timeSinceLastCarRight = random(60, 120);
+
+  trainTrackIndex = backgrounds.indexOf('traintrack');
+  timeSinceLastTrain = random(60, 120);
+
+
+  //Drawing Bridge
+  backgrounds.forEach((bg, index) => {
+    if (bg === 'water') {
+      waterIndices.push(index);
+      bridgeColumns.push(Math.floor(Math.random() * 10));
+    }
+  });
+  // If the two road of water are adjacent, draw the bridge at the same column for both rows
+  if (waterIndices.length >= 2 && Math.abs(waterIndices[0] - waterIndices[1]) === 1) {
+    let column = Math.floor(Math.random() * 10);
+    bridgeColumns[0] = column;
+    bridgeColumns[1] = column;
+  }
+
+
+  //Drawing Trees and Bushes
+  backgrounds.forEach((bg, i) => {
+    if (bg === 'walkroad') {
+      let columns = [];
+      while (columns.length < Math.round(random(2, 3))) {
+        let column = Math.floor(Math.random() * 10);
+        if (!columns.includes(column)) {
+          columns.push(column);
+        }
+      }
+      // Storing tree,bush position
+      for (let j = 0; j < columns.length; j++) {
+        let x = columns[j] * 100;
+        let y = i * 100;
+        let obstacleImage = Math.random() < 0.5 ? images['tree'] : images['bush'];
+        walkroadObstacles.push({ image: obstacleImage, x: x, y: y });
+      }
+    }
+  });
+
+  //Drawing waterleaf
+  backgrounds.forEach((bg, i) => {
+    if (bg === 'water') {
+      // Randomly draw waterleaf, making sure to not overlap with the bridges
+      let columns = [];
+      while (columns.length < Math.round(random(1, 2))) {
+        let column = Math.floor(Math.random() * 10);
+        if (!columns.includes(column) && !bridgeColumns.includes(column)) {
+          columns.push(column);
+        }
+      }
+      // Store the waterleaf position
+      for (let j = 0; j < columns.length; j++) {
+        let x = columns[j] * 100;
+        let y = i * 100;
+        waterLeafPositions.push({ image: images['waterleaf'], x: x, y: y });
+      }
+    }
+  });
+
+  backgrounds.forEach((bg, i) => {
+    if (bg === 'water') {
+      for (let j = 0; j < 10; j++) {
+        if (!bridgeColumns.includes(j)) {
+          waterPositions.push({ image: images['water'], x: j * 100, y: i * 100 });
+        }
+      }
+    }
+  });
+
+  // Drawing Character
+  let bikeroadIndex = backgrounds.indexOf('bike');
+  let randomColumn = Math.floor(Math.random() * 10);
+  player = new Character(character['down'], randomColumn * 100, bikeroadIndex * 100);
+
+
+  //Finding position to draw Coins 
+  for (let i = 0; i < 10; i++) {
+    let validPosition = false;
+    while (!validPosition) {
+      let randomX = Math.floor(Math.random() * width);
+      let randomY = Math.floor(Math.random() * height);
+
+      randomX = Math.floor(randomX / 100) * 100;
+      randomY = Math.floor(randomY / 100) * 100;
+
+      let isOnObstacle = false;
+      for (let obstacle of walkroadObstacles) {
+        if (obstacle.x === randomX && obstacle.y === randomY) {
+          isOnObstacle = true;
+          break;
+        }
+      }
+
+      let isOnWater = false;
+      for (let water of waterPositions) {
+        if (water.x === randomX && water.y === randomY) {
+          isOnWater = true;
+          break;
+        }
+      }
+
+      let isNearOtherCoin = false;
+      for (let coin of coins) {
+        if (Math.abs(coin.x - randomX) < 100 && Math.abs(coin.y - randomY) < 100) {
+          isNearOtherCoin = true;
+          break;
+        }
+      }
+
+      let isOnCoin = false;
+      for (let coin of coins) {
+        if (coin.x === randomX && coin.y === randomY) {
+          isOnCoin = true;
+          break;
+        }
+      }
+
+      let isOnWaterTile = backgrounds[Math.floor(randomY / 100)] === 'water';
+
+      if (!isOnObstacle && !isOnCoin && !isOnWater && !isNearOtherCoin && !isOnWaterTile) {
+        validPosition = true;
+        coins.push(new Coin(images['coin'], randomX, randomY));
+      }
+    }
+  }
+
+  setInterval(updateTimeLeft, 1000);
+
+
+}
+
+
+
+
+
+
 
 class Character {
   constructor(image, x, y) {
@@ -151,21 +311,24 @@ class Character {
   }
 }
 
-function setup() {
-  createCanvas(1000, 800);
-  shuffle(backgrounds, true);
 
-  if (!backgrounds.includes('walkroad')) {
-    backgrounds[0] = 'walkroad';
+function addCar(direction) {
+  let carImage;
+  if (direction === 'left') {
+    carImage = carLeft[Object.keys(carLeft)[Math.floor(Math.random() * Object.keys(carLeft).length)]];
+    // check space for new car and safe distance
+    if (carsLeft.length === 0 || (width - carsLeft[carsLeft.length - 1].x) > carImage.width + SAFE_DISTANCE) {
+      carsLeft.push(new Car(carImage, 'left', random(0.1, 1)));  // Random speed 1~5
+    }
+  } else {
+    carImage = carRight[Object.keys(carRight)[Math.floor(Math.random() * Object.keys(carRight).length)]];
+    if (carsRight.length === 0 || carsRight[carsRight.length - 1].x > carImage.width + SAFE_DISTANCE) {
+      carsRight.push(new Car(carImage, 'right', random(0.1, 1)));
+    }
   }
-  backgrounds.push('walkroad');
-  //console.log(backgrounds);
-  let roadIndices = backgrounds.map((bg, index) => bg === 'road' ? index : -1).filter(index => index !== -1);
-  firstRoadIndex = roadIndices[0];
-  secondRoadIndex = roadIndices[1];
 }
 
-
+//Car
 class Car {
   constructor(image, direction, speed = 2) {
     this.image = image;
@@ -212,7 +375,7 @@ class Car {
   }
 }
 
-
+//Train
 class Train {
   constructor(image, direction, speed = 2) {
     this.image = image;
@@ -245,6 +408,7 @@ function addTrain() {
   trains.push(train);
 }
 
+//Coin
 class Coin {
   constructor(image, x, y) {
     this.image = image;
@@ -257,6 +421,7 @@ class Coin {
   }
 }
 
+//Moving Player
 function keyPressed() {
   switch (keyCode) {
     case UP_ARROW:
@@ -273,6 +438,7 @@ function keyPressed() {
       break;
   }
 
+  //Restart game
   if (key === ' ') {
     location.reload();
   }
