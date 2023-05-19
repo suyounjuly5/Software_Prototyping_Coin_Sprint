@@ -11,3 +11,43 @@ canvas {
   display: block;
   margin: auto;
 }
+
+
+#game-over {
+  color: red;
+  font-family: 'Press Start 2P', cursive;
+  position: absolute;
+  top: 43%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 70px;
+  text-align: center;
+  text-shadow: -2px 0 white, 0 2px white, 2px 0 white, 0 -2px white;
+  /* adds a black stroke */
+}
+
+#next-level {
+  color: green;
+  font-family: 'Press Start 2P', cursive;
+  position: absolute;
+  top: 43%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 50px;
+  text-align: center;
+  text-shadow: -2px 0 white, 0 2px white, 2px 0 white, 0 -2px white;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  width: 1000px;
+  margin: 0 auto;
+}
+
+#time-left,
+#coins-collected {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 15px;
+  color: black;
+}

@@ -9,12 +9,29 @@
   <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
   <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
 
+
+
   <link rel="stylesheet" type="text/css" href="css/style.css" />
   <meta charset="utf-8" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+
 </head>
 
-<script defer src="sketch.js"></script>
+<body>
 
-<body></body>
+  <script defer src="main.js"></script>
+
+  <header>
+    <div id="time-left">Timer:</div>
+    <div id="coins-collected">Coins Collected: 0</div>
+  </header>
+
+  <div id="game-over" style="display: none;">Game Over</div>
+  <div id="next-level" style="display: none;">Hooray! Next Level</div>
+</body>
 
 </html>
