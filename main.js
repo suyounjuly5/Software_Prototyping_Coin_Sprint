@@ -89,6 +89,8 @@ function updateTimeLeft() {
   }
 }
 
+
+
 class Character {
   constructor(image, x, y) {
     this.image = image;
@@ -149,3 +151,86 @@ class Character {
   }
 }
 
+function setup() {
+  createCanvas(1000, 800);
+  shuffle(backgrounds, true);
+
+  if (!backgrounds.includes('walkroad')) {
+    backgrounds[0] = 'walkroad';
+  }
+  backgrounds.push('walkroad');
+  //console.log(backgrounds);
+  let roadIndices = backgrounds.map((bg, index) => bg === 'road' ? index : -1).filter(index => index !== -1);
+  firstRoadIndex = roadIndices[0];
+  secondRoadIndex = roadIndices[1];
+}
+
+
+class Car {
+  constructor(image, direction, speed = 2) {
+    this.image = image;
+    this.direction = direction;
+    this.speed = speed;
+    if (this.direction === 'left') {
+      this.x = width;
+    } else {
+      this.x = -this.image.width;
+    }
+  }
+
+  move(cars) {
+    if (this.direction === 'left') {
+      this.x -= this.speed;
+    } else {
+      this.x += this.speed;
+    }
+    this.checkDistance(cars);
+  }
+
+
+  checkDistance(cars) {
+    let nextCar;
+    if (this.direction === 'left') {
+      nextCar = cars.find(car => car.x < this.x);
+    } else {
+      nextCar = cars.find(car => car.x > this.x);
+    }
+
+    if (nextCar && abs(nextCar.x - this.x) < SAFE_DISTANCE) {
+      this.speed = max(0, this.speed - 0.5);  // Slow down by 0.5, but not 0
+    } else if (this.speed < 5) {  //  speed is less than 5, speed up, if there is no car
+      this.speed += 0.5;
+    }
+  }
+
+  isOffScreen() {
+    if (this.direction === 'left') {
+      return this.x < -this.image.width;
+    } else {
+      return this.x > width;
+    }
+  }
+}
+
+
+
+function keyPressed() {
+  switch (keyCode) {
+    case UP_ARROW:
+      player.move('up');
+      break;
+    case DOWN_ARROW:
+      player.move('down');
+      break;
+    case LEFT_ARROW:
+      player.move('left');
+      break;
+    case RIGHT_ARROW:
+      player.move('right');
+      break;
+  }
+
+  if (key === ' ') {
+    location.reload();
+  }
+}
