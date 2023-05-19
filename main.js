@@ -363,6 +363,38 @@ function draw() {
     }
   }
 
+  if (playerBackground === 'water') {
+    let playerIsOnBridge = false;
+    let playerIsOnWaterLeaf = false;
+
+    // check if player is on bridge
+    for (let i = 0; i < bridgeColumns.length; i++) {
+      if (waterIndices[i] * 100 === player.y && bridgeColumns[i] * 100 === player.x) {
+        playerIsOnBridge = true;
+        break;
+      }
+    }
+    // check if player is on waterleaf
+    for (let i = 0; i < waterLeafPositions.length; i++) {
+      if (waterLeafPositions[i].x === player.x && waterLeafPositions[i].y === player.y) {
+        playerIsOnWaterLeaf = true;
+        break;
+      }
+    }
+
+    // if player is not on bridge or waterleaf, then collision with water
+    if (!playerIsOnBridge && !playerIsOnWaterLeaf) {
+      console.log('Game Over! Player fell into the water.');
+      gameOver = true;
+      noLoop();
+      document.getElementById('game-over').style.display = 'block';
+    }
+  }
+
+
+
+
+
 }
 
 
