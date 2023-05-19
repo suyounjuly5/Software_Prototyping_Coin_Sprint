@@ -241,10 +241,129 @@ function setup() {
   }
 
   setInterval(updateTimeLeft, 1000);
-
-
 }
 
+
+function draw() {
+
+  for (let i = 0; i < backgrounds.length; i++) {
+    if (backgrounds[i] === 'road' && backgrounds[i + 1] === 'road') {
+      // If two road.png is adjacent, replace with 'roadtop' and 'roaddown'
+      for (let j = 0; j < 10; j++) {
+        image(images['roadtop'], j * 100, i * 100);
+        image(images['roaddown'], j * 100, (i + 1) * 100);
+      }
+      i++;
+    } else {
+      // Draw other backgrounds
+      for (let j = 0; j < 10; j++) {
+        let waterIndex = waterIndices.indexOf(i);
+        if (waterIndex !== -1 && j === bridgeColumns[waterIndex]) {
+          // Draw bridge
+          image(images['bridge'], j * 100, i * 100);
+        } else {
+          image(images[backgrounds[i]], j * 100, i * 100);
+        }
+      }
+    }
+  }
+
+  // Draw the trees,bushes
+  for (let obstacle of walkroadObstacles) {
+    image(obstacle.image, obstacle.x, obstacle.y);
+  }
+
+  for (let waterleaf of waterLeafPositions) {
+    image(waterleaf.image, waterleaf.x, waterleaf.y);
+  }
+
+  // for the first row of road, draw cars going to left
+  for (let i = carsLeft.length - 1; i >= 0; i--) {
+    let car = carsLeft[i];
+    car.move(carsLeft);
+    if (car.isOffScreen()) {
+      carsLeft.splice(i, 1);
+      addCar('left');
+    } else {
+      image(car.image, car.x, firstRoadIndex * 100 + 50 - car.image.height / 2);
+    }
+  }
+
+  //  for the second row of road, draw cars going to right
+  for (let i = carsRight.length - 1; i >= 0; i--) {
+    let car = carsRight[i];
+    car.move(carsRight);
+    if (car.isOffScreen()) {
+      carsRight.splice(i, 1);
+      addCar('right');
+    } else {
+      image(car.image, car.x, secondRoadIndex * 100 + 50 - car.image.height / 2);
+    }
+  }
+
+  // Update timers
+  timeSinceLastCarLeft--;
+  timeSinceLastCarRight--;
+
+  // Check time to add a new car
+  if (timeSinceLastCarLeft <= 0) {
+    addCar('left');
+    timeSinceLastCarLeft = random(120, 240);
+  }
+  if (timeSinceLastCarRight <= 0) {
+    addCar('right');
+    timeSinceLastCarRight = random(120, 240);
+  }
+
+  //draw train
+  for (let i = trains.length - 1; i >= 0; i--) {
+    let train = trains[i];
+    train.move(trains);
+    if (train.isOffScreen()) {
+      trains.splice(i, 1);
+      addTrain();
+    } else {
+      image(train.image, train.x, trainTrackIndex * 100 + 50 - train.image.height / 2);
+    }
+  }
+
+  timeSinceLastTrain--;
+
+  // Check time to add a new train
+  if (timeSinceLastTrain <= 0) {
+    addTrain();
+    timeSinceLastTrain = random(100000, 200000);
+  }
+
+
+  player.draw();
+
+
+  let playerYIndex = Math.floor(player.y / 100);
+  let playerBackground = backgrounds[playerYIndex];
+
+  // check car collisions only when the player is on the 'road' background
+  if (playerBackground === 'road') {
+    for (let car of carsLeft) {
+      if (player.y === firstRoadIndex * 100 && player.checkCollision(car)) {
+        console.log('Game Over! Collision with car on left lane');
+        gameOver = true;
+        noLoop();
+        document.getElementById('game-over').style.display = 'block';
+      }
+    }
+
+    for (let car of carsRight) {
+      if (player.y === secondRoadIndex * 100 && player.checkCollision(car)) {
+        console.log('Game Over! Collision with car on right lane');
+        gameOver = true;
+        noLoop();
+        document.getElementById('game-over').style.display = 'block';
+      }
+    }
+  }
+
+}
 
 
 
