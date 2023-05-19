@@ -337,12 +337,10 @@ function draw() {
 
 
   player.draw();
-
-
   let playerYIndex = Math.floor(player.y / 100);
   let playerBackground = backgrounds[playerYIndex];
 
-  // check car collisions only when the player is on the 'road' background
+  // Gameover when hit by car 
   if (playerBackground === 'road') {
     for (let car of carsLeft) {
       if (player.y === firstRoadIndex * 100 && player.checkCollision(car)) {
@@ -363,6 +361,19 @@ function draw() {
     }
   }
 
+  // Gameover when hit by train
+  if (playerBackground === 'traintrack') {
+    for (let train of trains) {
+      if (player.checkCollision(train)) {
+        console.log('Game Over! Collision with train');
+        gameOver = true;
+        noLoop();
+        document.getElementById('game-over').style.display = 'block';
+      }
+    }
+  }
+
+
   if (playerBackground === 'water') {
     let playerIsOnBridge = false;
     let playerIsOnWaterLeaf = false;
@@ -382,7 +393,16 @@ function draw() {
       }
     }
 
-    // if player is not on bridge or waterleaf, then collision with water
+    //GameWin if all the coins are collected
+    if (coins.length === 0) {
+      console.log('You collected all the coins!');
+      noLoop();
+      gameOver = true;
+      document.getElementById('next-level').style.display = 'block';
+    }
+
+
+    // Gameover. if player is not on bridge or waterleaf, then collision with water
     if (!playerIsOnBridge && !playerIsOnWaterLeaf) {
       console.log('Game Over! Player fell into the water.');
       gameOver = true;
@@ -392,16 +412,77 @@ function draw() {
   }
 
 
+  //GameOver if stay in same position for more than 5 seconds
+  if (lastPosition !== null && lastPosition.x === player.x && lastPosition.y === player.y) {
+    timeAtPosition++;
+    if (timeAtPosition > 5 * 60) {
+      console.log('Game Over! Player stayed at one spot for too long');
+      gameOver = true;
+      noLoop();
+      document.getElementById('game-over').style.display = 'block';
+    }
+  } else {
+    lastPosition = { x: player.x, y: player.y };
+    timeAtPosition = 0;
+  }
+
+  //GameOver if timer runs out
+  totalTime++;
+  if (totalTime > 60 * 60) {
+    console.log('Game Over! Time ran out');
+    gameOver = true;
+    noLoop();
+    document.getElementById('game-over').style.display = 'block';
+  }
 
 
+  // draw coin
+  for (let coin of coins) {
+    coin.draw();
+  }
+
+  for (let i = coins.length - 1; i >= 0; i--) {
+    if (player.checkCollision(coins[i])) {
+      console.log('Coin collected!');
+      coins.splice(i, 1);
+      collectCoin();
+    }
+  }
+
+  // prevent the live web to scoll left and right when playing the game
+  window.addEventListener("keydown", function (event) {
+    if (event.key == 'ArrowLeft' || event.key == 'ArrowRight') {
+      event.preventDefault();
+    }
+  }, false);
+
+  // to show timer and coins collected
+  select('#time-left').html('Timer: ' + timeLeft);
+  select('#coins-collected').html('Coins Collected: ' + coinsCollected);
 
 }
 
 
+// update timer
+function updateTimeLeft() {
+  if (!gameOver && timeLeft > 0) {
+    timeLeft--;
+    select('#time-left').html('Timer: ' + timeLeft);
+  } else {
+    // Handle game over scenario
+    gameOver = true;
+
+  }
+}
+
+// update number of coins collected
+function collectCoin() {
+  coinsCollected++;
+  select('#coins-collected').html('Coins Collected: ' + coinsCollected);
+}
 
 
-
-
+//Character
 class Character {
   constructor(image, x, y) {
     this.image = image;
