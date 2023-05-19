@@ -213,6 +213,39 @@ class Car {
 }
 
 
+class Train {
+  constructor(image, direction, speed = 2) {
+    this.image = image;
+    this.direction = direction;
+    this.speed = speed;
+    if (this.direction === 'right') {
+      this.x = -this.image.width;
+    }
+  }
+
+  move() {
+    this.x += this.speed;
+    //console.log("Train speed: " + this.speed);
+  }
+
+  isOffScreen() {
+    if (this.direction === 'right') {
+      return this.x > width;
+    } else {
+      return this.x < -this.image.width;
+    }
+  }
+}
+
+function addTrain() {
+  let trainImage = images['train'];
+  let direction = 'right';
+
+  let train = new Train(trainImage, direction, random(1, 20));
+  trains.push(train);
+}
+
+
 
 function keyPressed() {
   switch (keyCode) {
