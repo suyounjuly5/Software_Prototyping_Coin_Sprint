@@ -393,14 +393,6 @@ function draw() {
       }
     }
 
-    //GameWin if all the coins are collected
-    if (coins.length === 0) {
-      console.log('You collected all the coins!');
-      noLoop();
-      gameOver = true;
-      document.getElementById('next-level').style.display = 'block';
-    }
-
 
     // Gameover. if player is not on bridge or waterleaf, then collision with water
     if (!playerIsOnBridge && !playerIsOnWaterLeaf) {
@@ -435,6 +427,13 @@ function draw() {
     document.getElementById('game-over').style.display = 'block';
   }
 
+  //GameWin if all the coins are collected
+  if (coins.length === 0) {
+    console.log('You collected all the coins!');
+    noLoop();
+    gameOver = true;
+    document.getElementById('next-level').style.display = 'block';
+  }
 
   // draw coin
   for (let coin of coins) {
